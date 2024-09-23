@@ -107,22 +107,26 @@ function viewAllDepartments():void {
 
 //select query-> view all roles
 function viewAllRoles():void{
-app.get('/api/roles',(_req,res) => {
+// app.get('/api/roles',(_req,res) => {
 
    const sql = `SELECT id,title,department, salary `;
 
     pool.query(sql,(err:Error,result:QueryResult) =>{
 
         if(err){
-            res.status(500).json({error:err.message});
+            // res.status(500).json({error:err.message});
+            console.error("Error fetching  Roles!!",err.message)
+            startApp(); 
         }
-        const {rows} = result;
-        res.json({
-            message : 'success',
-            data : rows
-        });//end res.json
+        console.table(result.rows)
+        startApp(); 
+        // const {rows} = result;
+        // res.json({
+        //     message : 'success',
+        //     data : rows
+        // });//end res.json
     });//end pool.query
-});//end app.get
+// });//end app.get
 }
 
 //select query-> view all employees
