@@ -315,7 +315,7 @@ function updateEmployeeRole() {
             //update
             const sql = 'UPDATE employee SET role_id = $1 WHERE id =$2';
             const result = await pool.query(sql, [newRoleId, employeeId]);
-            console.log('Employee role updated successfully:', result.rows[0]);
+            console.log('Employee role updated successfully:', result);
             startApp();
         }
         catch (err) {
