@@ -189,6 +189,41 @@ function addDepartment(){
 
 }
 
+//add a role
+//enter the name, salary, and department for the role and that role is added to the database
+function addRole(){
+    // app.post('/add-role',async(req,res)=>{
+       
+       inquirer.prompt([
+        {
+            name: 'name',
+            type: 'input',
+            message: 'Enter the name of the role : ',
+            validate : input => input ? true : 'Role cannot be empty'
+        }
+    ]).then(async(answers)=>{
+        const {name, salary,department} = answers;
+        try{
+            const deptResult = await pool.query('SELECT id FROM department WHERE name = $1',[department]);
+            if (deptResult.rows.length === 0) {
+                console.error("Deparment not found!")
+                return startApp();
+              }
+              const departmentId = deptResult.rows[0].id;
+              const result = await pool.query(`INSERT INTO role (title, salary, department_id) VALUES($1,$2,$3)  RETURNING * `,[name,salary,departmentId]);
+              console.log("Role added Successfully : ",result.rows[0]);
+              startApp();
+        }catch(err){
+            
+            console.error("Role cannot be added")
+            startApp();
+        }
+    })
+        
+        
+    // });
+}
+
 // Default response for any other request (Not Found)
 app.use((_req, res) => {
     res.status(404).end();
