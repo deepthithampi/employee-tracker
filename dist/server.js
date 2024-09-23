@@ -89,20 +89,22 @@ function viewAllDepartments() {
 //select query-> view all roles
 function viewAllRoles() {
     // app.get('/api/roles',(_req,res) => {
-    const sql = `SELECT id,title,department, salary `;
+    const sql = `SELECT id,title,department_id, salary FROM role `;
     pool.query(sql, (err, result) => {
         if (err) {
             // res.status(500).json({error:err.message});
             console.error("Error fetching  Roles!!", err.message);
-            startApp();
         }
-        console.table(result.rows);
-        startApp();
         // const {rows} = result;
         // res.json({
         //     message : 'success',
         //     data : rows
         // });//end res.json
+        // result.rows.forEach(row =>{
+        // console.log(`ID : ${row.id} | Title : ${row.title} | Salary : ${row.salary} | Department ID : ${row.department_id}`);
+        console.table(result.rows);
+        startApp();
+        // })
     }); //end pool.query
     // });//end app.get
 }
@@ -247,6 +249,48 @@ function addEmployee() {
     });
     // })
 }
+//update an employee role
+//prompted to select an employee to update and their new role and this information is updated in the database 
+function updateEmployeeRole() {
+    // app.put('/update-employee', async (req,res) => {
+    inquirer.prompt([
+        {
+            name: 'employeeId',
+            type: 'input',
+            message: 'Enter the ID of the employee you want to update:',
+            validate: input => !isNaN(parseInt(input)) ? true : 'Please enter a valid number'
+        },
+        {
+            name: 'newRoleId',
+            type: 'input',
+            message: 'Enter the new role ID:',
+            validate: input => !isNaN(parseInt(input)) ? true : 'Please enter a valid number'
+        }
+    ]).then(async (answers) => {
+        const { employeeId, newRoleId } = answers;
+        try {
+            const employeeCheck = await pool.query('SELECT * FROM employee WHERE id = $1', [employeeId]);
+            if (employeeCheck.rows.length === 0) {
+                console.error('Employee not found');
+            }
+            const roleCheck = await pool.query('SELECT * FROM role WHERE id = $1', [newRoleId]);
+            if (roleCheck.rows.length === 0) {
+                console.error('Role not found');
+                return startApp();
+            }
+            //update
+            const sql = 'UPDATE employee SET role_id = $1 WHERE id =$2';
+            const result = await pool.query(sql, [newRoleId, employeeId]);
+            console.log('Employee role updated successfully:', result.rows[0]);
+            startApp();
+        }
+        catch (err) {
+            console.error('Failed to update employee role');
+        }
+    });
+    // })
+}
+startApp();
 // Default response for any other request (Not Found)
 app.use((_req, res) => {
     res.status(404).end();

@@ -107,27 +107,30 @@ function viewAllDepartments():void {
 
 //select query-> view all roles
 function viewAllRoles():void{
-// app.get('/api/roles',(_req,res) => {
-
-   const sql = `SELECT id,title,department, salary `;
-
-    pool.query(sql,(err:Error,result:QueryResult) =>{
-
-        if(err){
-            // res.status(500).json({error:err.message});
-            console.error("Error fetching  Roles!!",err.message)
-            startApp(); 
-        }
-        console.table(result.rows)
-        startApp(); 
-        // const {rows} = result;
-        // res.json({
-        //     message : 'success',
-        //     data : rows
-        // });//end res.json
-    });//end pool.query
-// });//end app.get
-}
+    // app.get('/api/roles',(_req,res) => {
+    
+       const sql = `SELECT id,title,department_id, salary FROM role `;
+    
+        pool.query(sql,(err:Error,result:QueryResult) =>{
+    
+            if(err){
+                // res.status(500).json({error:err.message});
+                console.error("Error fetching  Roles!!",err.message)
+            }
+            // const {rows} = result;
+            // res.json({
+            //     message : 'success',
+            //     data : rows
+            // });//end res.json
+            // result.rows.forEach(row =>{
+                // console.log(`ID : ${row.id} | Title : ${row.title} | Salary : ${row.salary} | Department ID : ${row.department_id}`);
+                console.table(result.rows)
+                startApp(); 
+            // })
+        });//end pool.query
+    // });//end app.get
+    }
+    
 
 //select query-> view all employees
 function viewAllEmployees():void{
@@ -306,7 +309,7 @@ function updateEmployeeRole(){
             validate: input => !isNaN(parseInt(input)) ? true : 'Please enter a valid number'
         }
     ]).then(async(answers)=>{
-        // to be coded 
+        
         const {employeeId, newRoleId} = answers;
          
         try{
@@ -333,6 +336,7 @@ function updateEmployeeRole(){
     // })
 }
 
+startApp();
 
 // Default response for any other request (Not Found)
 app.use((_req, res) => {
