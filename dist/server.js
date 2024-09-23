@@ -7,6 +7,18 @@ const app = express();
 // Express middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+// Function to fetch managers from the database
+// async function getManagers() {
+//     try {
+//       const res = await pool.query(
+//         `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee WHERE manager_id IS NULL`
+//       );
+//       return res.rows.map(manager => ({ name: manager.name, value: manager.id }));
+//     } catch (error) {
+//       console.error('Error fetching managers:', error);
+//       return [];
+//     }
+//   }
 // inquirer -> start of the application : options be like
 function startApp() {
     inquirer
@@ -52,19 +64,11 @@ function startApp() {
                 break;
             case 'Exit':
                 pool.end();
-                console.log('Goodbye!');
+                console.log('Thank You for Using Employee Tracker App');
                 process.exit();
         }
     });
 }
-// add a department
-//enter the name of the department and that department is added to the database
-//add a role
-//enter the name, salary, and department for the role and that role is added to the database
-// add an employee
-//enter the employee’s first name, last name, role, and manager, and that employee is added to the database
-//update an employee role
-//prompted to select an employee to update and their new role and this information is updated in the database 
 //select query-> view all departments
 function viewAllDepartments() {
     //   app.get('/api/departments',(_req,res) => {
@@ -159,32 +163,58 @@ function addDepartment() {
     }); //end then im=nquirer
     // });
 }
+async function getDepartments() {
+    try {
+        const res = await pool.query('SELECT id, name FROM department');
+        return res.rows.map(dept => ({ name: dept.name, value: dept.id }));
+    }
+    catch (error) {
+        console.error('Error fetching departments:', error);
+        return [];
+    }
+}
 //add a role
 //enter the name, salary, and department for the role and that role is added to the database
-function addRole() {
+async function addRole() {
     // app.post('/add-role',async(req,res)=>{
+    const departments = await getDepartments();
+    // Check if departments is an array and has elements
+    if (!Array.isArray(departments) || departments.length === 0) {
+        console.log('No departments found. Please add a department first.');
+        return startApp();
+    }
     inquirer.prompt([
         {
             name: 'name',
             type: 'input',
             message: 'Enter the name of the role : ',
             validate: input => input ? true : 'Role cannot be empty'
+        },
+        {
+            name: 'department',
+            type: 'list',
+            choices: departments
+        },
+        {
+            name: 'salary',
+            type: 'input',
+            message: 'Enter salary : '
         }
     ]).then(async (answers) => {
         const { name, salary, department } = answers;
         try {
-            const deptResult = await pool.query('SELECT id FROM department WHERE name = $1', [department]);
-            if (deptResult.rows.length === 0) {
-                console.error("Deparment not found!");
-                return startApp();
-            }
-            const departmentId = deptResult.rows[0].id;
-            const result = await pool.query(`INSERT INTO role (title, salary, department_id) VALUES($1,$2,$3)  RETURNING * `, [name, salary, departmentId]);
+            // const deptResult = await pool.query('SELECT id FROM department WHERE name = $1',[department]);
+            // if (deptResult.rows.length === 0) {
+            //     console.error("Deparment not found!")
+            //     return startApp();
+            //   }
+            //   const departmentId = deptResult.rows[0].id;
+            const result = await pool.query(`INSERT INTO role (title, salary, department_id) VALUES($1,$2,$3)  RETURNING * `, [name, salary, department]);
             console.log("Role added Successfully : ", result.rows[0]);
             startApp();
         }
         catch (err) {
-            console.error("Role cannot be added");
+            console.error("Role cannot be added", err.message);
             startApp();
         }
     });
@@ -237,14 +267,17 @@ function addEmployee() {
                 const managerResult = await pool.query('SELECT id FROM employee WHERE first_name = $1 AND last_name = $2', manager.split(' '));
                 if (managerResult.rows.length === 0) {
                     console.error('Manager not found');
+                    startApp();
                 }
                 managerId = managerResult.rows[0].id;
                 await pool.query(`INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES ($1,$2,$3,$4)  RETURNING * `, [fName, lName, roleId, managerId]);
                 console.log('Employee added successfully');
+                startApp();
             }
         }
         catch (err) {
             console.error("Failed to add employee'");
+            startApp();
         }
     });
     // })
@@ -272,6 +305,7 @@ function updateEmployeeRole() {
             const employeeCheck = await pool.query('SELECT * FROM employee WHERE id = $1', [employeeId]);
             if (employeeCheck.rows.length === 0) {
                 console.error('Employee not found');
+                startApp();
             }
             const roleCheck = await pool.query('SELECT * FROM role WHERE id = $1', [newRoleId]);
             if (roleCheck.rows.length === 0) {
