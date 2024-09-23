@@ -131,22 +131,32 @@ function viewAllRoles():void{
 
 //select query-> view all employees
 function viewAllEmployees():void{
-    app.get('api/employees',(_req,res) =>{
+    // app.get('api/employees',(_req,res) =>{
         
-       const sql =`SELECT `;// employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
+       const sql =`
+        SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, 
+               CONCAT(manager.first_name, ' ', manager.last_name) AS manager
+        FROM employee
+        LEFT JOIN role ON employee.role_id = role.id
+        LEFT JOIN department ON role.department_id = department.id
+        LEFT JOIN employee manager ON employee.manager_id = manager.id`;// employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
 
        pool.query(sql,(err: Error,result : QueryResult) =>{
 
             if(err){
-                res.status(500).json({error:err.message});
+                // res.status(500).json({error:err.message});
+                console.error("Error fetching Employees ", err.message);
+                startApp();
             } 
-            const {rows} = result;
-            res.json({
-                message : 'success',
-                data : rows
-            });// end res.json       
+            console.table(result.rows)
+            startApp();
+            // const {rows} = result;
+            // res.json({
+            //     message : 'success',
+            //     data : rows
+            // });// end res.json       
        });//end pool.query
-    });//end app.get
+    // });//end app.get
 }
 
 // Default response for any other request (Not Found)
