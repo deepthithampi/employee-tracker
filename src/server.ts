@@ -2,7 +2,7 @@ import express from 'express';
 import { QueryResult } from 'pg';
 import { pool, connectToDb } from './connection.js';
 import inquirer from "inquirer";
-import { error } from 'console';
+
 
 await connectToDb();
 
@@ -157,6 +157,36 @@ function viewAllEmployees():void{
             // });// end res.json       
        });//end pool.query
     // });//end app.get
+}
+
+// add a department
+//enter the name of the department and that department is added to the database
+function addDepartment(){
+
+    // app.post('/add-department',async(req,res) =>{
+    inquirer.prompt([
+        {
+            name : 'name',
+            type : 'input',
+            message : 'Enter the name of the department : ',
+            validate : input => input ? true : 'Department name cannot be empty'
+        }
+
+    ]).then(async (answer)=>{
+        const {name} = answer;
+        try{
+            const result = await pool.query('INSERT INTO department (name) VALUES ($1)  RETURNING * ',[name]);
+            console.log('Department added successfully : ',result.rows[0]);
+            startApp();
+        }catch(err){
+            console.error('Failed to add department:');
+            startApp();
+        }
+    });//end then im=nquirer
+        
+        
+    // });
+
 }
 
 // Default response for any other request (Not Found)
