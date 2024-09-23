@@ -59,7 +59,7 @@ function startApp() {
                     break;
                 case 'Exit':
                     pool.end();
-                    console.log('Goodbye!');
+                    console.log('Thank You for Using Employee Tracker App');
                     process.exit();
             }
         });
