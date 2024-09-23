@@ -81,24 +81,27 @@ function startApp() {
 //select query-> view all departments
 function viewAllDepartments():void {
 
-  app.get('/api/departments',(_req,res) => {
+//   app.get('/api/departments',(_req,res) => {
    
     const sql = `SELECT name,id FROM department`;
 
    pool.query(sql,(err:Error,result: QueryResult) => {
 
     if(err){
-        res.status(500).json({error:err.message})
-        return;
+        // res.status(500).json({error:err.message})
+        console.error('Error fetching departments:', err.message);
+        return startApp(); ;
     }
-    const {rows} = result;
-    res.json({
-        message : 'success',
-        data : rows
-    });//res.json end
+    console.table(result.rows)
+    startApp(); 
+    // const {rows} = result;
+    // res.json({
+    //     message : 'success',
+    //     data : rows
+    // });//res.json end
    });//pool.query end
 
-  });//app.get end 
+//   });//app.get end 
     
 }
 
