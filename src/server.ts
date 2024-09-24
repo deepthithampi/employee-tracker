@@ -13,20 +13,6 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-
-// Function to fetch managers from the database
-// async function getManagers() {
-//     try {
-//       const res = await pool.query(
-//         `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee WHERE manager_id IS NULL`
-//       );
-//       return res.rows.map(manager => ({ name: manager.name, value: manager.id }));
-//     } catch (error) {
-//       console.error('Error fetching managers:', error);
-//       return [];
-//     }
-//   }
-  
   
 // inquirer -> start of the application : options be like
 function startApp() {
@@ -45,6 +31,8 @@ function startApp() {
                     'Add an employee',
                     'Update employee role',
                     'Delete an Employee',
+                    'View Employees By Manager',
+                    'View Employees By Department',
                     'Exit'
                 ]
             }
@@ -75,6 +63,12 @@ function startApp() {
                 case 'Delete an Employee':
                     deleteEmployee();
                     break;    
+                case 'View Employees By Manager':
+                    viewEmployeesByManager();
+                    break;
+                case 'View Employees By Department':
+                    viewEmployeesByDepartment();
+                    break;        
                 case 'Exit':
                     pool.end();
                     console.log('Thank You for Using Employee Tracker App');
@@ -417,6 +411,64 @@ async function deleteEmployee() {
     });
 }
 
+//view employees by manager
+async function viewEmployeesByManager() {
+    const query = `
+      SELECT 
+        e.id AS employee_id,
+        e.first_name AS employee_firstname,
+        e.last_name AS employee_lastname,
+        m.id AS manager_id,
+        m.first_name AS manager_firstname,
+        m.last_name AS manager_lastname
+      FROM 
+        employee e
+      LEFT JOIN 
+        employee m ON e.manager_id = m.id
+      ORDER BY 
+        manager_id, e.id;
+    `;
+  
+    try {
+      const res = await pool.query(query);
+  
+      console.table(res.rows);
+       startApp(); 
+    } catch (err) {
+      console.error('Error executing query');
+      startApp();
+    }
+  }
+
+  //View employees by department.
+  async function viewEmployeesByDepartment(){
+    const sql = `
+
+    SELECT 
+     e.id AS employee_id,
+     e.first_name AS firstname,
+     e.last_name AS lastname,
+     d.name AS department
+     FROM employee e 
+     JOIN 
+     role r ON e.role_id = r.id
+     JOIN
+     department d ON r.department_id = d.id
+      ORDER BY 
+      d.name, e.id;
+    `;
+
+    try{
+        const res = await pool.query(sql);
+        console.table(res.rows);
+        startApp();
+    }catch(err){
+        console.error("Error executing query")
+        startApp();
+    }
+
+  }
+  
 
 startApp();
 
