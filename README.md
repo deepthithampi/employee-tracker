@@ -41,6 +41,6 @@ You can also find more of my work at [deepthithampi/employee-tracker](https://gi
 
 ## Walkthrough Video
 
-Here is a video demonstration the functionality of the prokect:
+Here is a video demonstration the functionality of the project:
 
-[Video](https://app.screencastify.com/v3/watch/sGINy0ctCCSWbKk0aM4m)
+[Video](https://drive.google.com/file/d/1PclJOWgBnLf0LyMLc-7QIwBuUBHrDkbu/view)
