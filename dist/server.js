@@ -35,6 +35,7 @@ function startApp() {
                 'Add a role',
                 'Add an employee',
                 'Update employee role',
+                'Delete an Employee',
                 'Exit'
             ]
         }
@@ -61,6 +62,9 @@ function startApp() {
                 break;
             case 'Update employee role':
                 updateEmployeeRole();
+                break;
+            case 'Delete an Employee':
+                deleteEmployee();
                 break;
             case 'Exit':
                 pool.end();
@@ -93,7 +97,10 @@ function viewAllDepartments() {
 //select query-> view all roles
 function viewAllRoles() {
     // app.get('/api/roles',(_req,res) => {
-    const sql = `SELECT id,title,department_id, salary FROM role `;
+    const sql = `SELECT role.id, role.title, role.salary, department.name AS department
+                    FROM role 
+                    JOIN department 
+                    ON role.department_id = department.id; `;
     pool.query(sql, (err, result) => {
         if (err) {
             // res.status(500).json({error:err.message});
@@ -314,8 +321,8 @@ function updateEmployeeRole() {
             }
             //update
             const sql = 'UPDATE employee SET role_id = $1 WHERE id =$2';
-            const result = await pool.query(sql, [newRoleId, employeeId]);
-            console.log('Employee role updated successfully:', result);
+            await pool.query(sql, [newRoleId, employeeId]);
+            console.log('Employee role updated successfully');
             startApp();
         }
         catch (err) {
@@ -323,6 +330,45 @@ function updateEmployeeRole() {
         }
     });
     // })
+}
+//Bonus Ones
+async function getEmployees() {
+    try {
+        const res = await pool.query(`
+            SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee
+        `);
+        return res.rows.map(emp => ({ name: emp.name, value: emp.id }));
+    }
+    catch (error) {
+        console.error('Error fetching employees:', error);
+        return [];
+    }
+}
+async function deleteEmployee() {
+    const employees = await getEmployees();
+    if (!Array.isArray(employees) || employees.length === 0) {
+        console.log('No employees found to delete.');
+        return startApp();
+    }
+    inquirer.prompt([
+        {
+            name: 'employee',
+            type: 'list',
+            message: 'Select the employee to delete:',
+            choices: employees,
+        },
+    ]).then(async (answer) => {
+        try {
+            const { employee } = answer;
+            await pool.query('DELETE FROM employee WHERE id = $1', [employee]);
+            console.log('Employee deleted successfully.');
+            startApp();
+        }
+        catch (err) {
+            console.error('Failed to delete employee');
+            startApp();
+        }
+    });
 }
 startApp();
 // Default response for any other request (Not Found)

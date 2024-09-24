@@ -38,3 +38,9 @@ Currently, there are no tests available for this project.
 ## Questions
 For any questions, please feel free to contact me at deepthi_thampi@hotmail.com. 
 You can also find more of my work at [deepthithampi/employee-tracker](https://github.com/deepthithampi/employee-tracker).
+
+## Walkthrough Video
+
+Here is a video demonstration the functionality of the prokect:
+
+[Video](https://app.screencastify.com/v3/watch/sGINy0ctCCSWbKk0aM4m)
