@@ -33,6 +33,7 @@ function startApp() {
                     'Delete an Employee',
                     'View Employees By Manager',
                     'View Employees By Department',
+                    'View the total utilized budget of a department',
                     'Exit'
                 ]
             }
@@ -68,7 +69,10 @@ function startApp() {
                     break;
                 case 'View Employees By Department':
                     viewEmployeesByDepartment();
-                    break;        
+                    break; 
+                case 'View the total utilized budget of a department':
+                    viewCombinedSalaryByDepartment();
+                    break;
                 case 'Exit':
                     pool.end();
                     console.log('Thank You for Using Employee Tracker App');
@@ -468,7 +472,32 @@ async function viewEmployeesByManager() {
     }
 
   }
-  
+
+  async function viewCombinedSalaryByDepartment(){
+    const sql = `
+       SELECT d.name AS department,
+       SUM(r.salary) AS total_salary
+       FROM department d
+       JOIN 
+       role r ON d.id = r.department_id
+       JOIN
+       employee e ON r.id = e.role_id
+       GROUP BY
+       d.name
+       ORDER BY
+       d.name;`;
+
+    try{
+        const res = await pool.query(sql);
+        console.table(res.rows);
+        startApp();
+
+    }catch(err){
+        console.error("Error executing query");
+        startApp();
+    }
+  }
+
 
 startApp();
 
